@@ -1,0 +1,140 @@
+# Python Virtual Environment
+venv/
+env/
+ENV/
+.venv/
+.env/
+
+# Environment Variables (SENSITIVE - contains bot token!)
+.env
+.env.local
+.env.*.local
+
+# Python Cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Distribution / packaging
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Data Files (Large files, regenerate from scripts)
+data/raw_messages.jsonl
+data/training_data.jsonl
+data/training_data_filtered.jsonl
+data/backfill_checkpoint.json
+data/vector_db/
+data/*.db
+data/*.sqlite
+
+# Model Files (Very large, download separately)
+models/
+adapters/discord-lora/
+*.bin
+*.safetensors
+*.pt
+*.pth
+*.ckpt
+*.h5
+
+# Logs
+logs/
+*.log
+
+# IDE / Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# PyCharm
+.idea/
+
+# VS Code
+.vscode/
+*.code-workspace
+
+# Spyder
+.spyderproject
+.spyproject
+
+# Rope
+.ropeproject
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre type checker
+.pyre/
+
+# Windows
+desktop.ini
+$RECYCLE.BIN/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# HuggingFace cache (optional - comment out if you want to cache models)
+.cache/
+huggingface/
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.swp
+
+# Discord bot specific
+checkpoint*.json
+*.checkpoint
+
+# Training outputs
+training_output/
+runs/
+outputs/
+wandb/
+
+# Analysis reports (can regenerate)
+data/analysis_report.txt
