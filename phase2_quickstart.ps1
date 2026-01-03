@@ -1,5 +1,5 @@
-# ⚡ Quick Start - Phase 2 (Training)
-# Run this to start model training
+# Phase 2 Quick Start - Model Training
+# Run this to start LLM training
 
 Write-Host ""
 Write-Host "=================================" -ForegroundColor Cyan
@@ -9,7 +9,7 @@ Write-Host ""
 
 # Check if in virtual environment
 if (-not $env:VIRTUAL_ENV) {
-    Write-Host "❌ Virtual environment not activated!" -ForegroundColor Red
+    Write-Host "[X] Virtual environment not activated!" -ForegroundColor Red
     Write-Host ""
     Write-Host "Run this first:" -ForegroundColor Yellow
     Write-Host "  .\venv\Scripts\Activate.ps1" -ForegroundColor White
@@ -17,11 +17,11 @@ if (-not $env:VIRTUAL_ENV) {
     exit 1
 }
 
-Write-Host "✅ Virtual environment active" -ForegroundColor Green
+Write-Host "[OK] Virtual environment active" -ForegroundColor Green
 
 # Check if training data exists
 if (-not (Test-Path "data\training_data.jsonl")) {
-    Write-Host "❌ Training data not found!" -ForegroundColor Red
+    Write-Host "[X] Training data not found!" -ForegroundColor Red
     Write-Host ""
     Write-Host "Run Phase 1 first:" -ForegroundColor Yellow
     Write-Host "  .\phase1_quickstart.ps1" -ForegroundColor White
@@ -30,20 +30,25 @@ if (-not (Test-Path "data\training_data.jsonl")) {
 }
 
 $dataSize = (Get-Item "data\training_data.jsonl").Length / 1MB
-Write-Host "✅ Training data found ($([math]::Round($dataSize, 2)) MB)" -ForegroundColor Green
+Write-Host "[OK] Training data found ($([math]::Round($dataSize, 2)) MB)" -ForegroundColor Green
 
 # Check GPU
 Write-Host ""
 Write-Host "Checking GPU..." -ForegroundColor Cyan
-$gpuCheck = python -c "import torch; print('CUDA' if torch.cuda.is_available() else 'NONE')" 2>$null
-if ($gpuCheck -eq "CUDA") {
-    Write-Host "✅ GPU available (CUDA enabled)" -ForegroundColor Green
-} else {
-    Write-Host "❌ GPU not available!" -ForegroundColor Red
-    Write-Host ""
-    Write-Host "This training requires a CUDA-capable GPU." -ForegroundColor Yellow
-    Write-Host "Check: nvidia-smi" -ForegroundColor White
-    Write-Host ""
+try {
+    $gpuCheck = python -c "import torch; print('CUDA' if torch.cuda.is_available() else 'NONE')" 2>$null
+    if ($gpuCheck -eq "CUDA") {
+        Write-Host "[OK] GPU available (CUDA enabled)" -ForegroundColor Green
+    } else {
+        Write-Host "[X] GPU not available!" -ForegroundColor Red
+        Write-Host ""
+        Write-Host "This training requires a CUDA-capable GPU." -ForegroundColor Yellow
+        Write-Host "Run: python scripts/check_gpu.py" -ForegroundColor White
+        Write-Host ""
+        exit 1
+    }
+} catch {
+    Write-Host "[X] Could not check GPU status" -ForegroundColor Red
     exit 1
 }
 
@@ -61,13 +66,13 @@ foreach ($dep in $deps) {
 }
 
 if ($missing.Count -gt 0) {
-    Write-Host "⚠️  Missing dependencies: $($missing -join ', ')" -ForegroundColor Yellow
+    Write-Host "[!] Missing dependencies: $($missing -join ', ')" -ForegroundColor Yellow
     Write-Host ""
     Write-Host "Installing missing packages..." -ForegroundColor Cyan
     pip install $missing -q
-    Write-Host "✅ Dependencies installed" -ForegroundColor Green
+    Write-Host "[OK] Dependencies installed" -ForegroundColor Green
 } else {
-    Write-Host "✅ All dependencies present" -ForegroundColor Green
+    Write-Host "[OK] All dependencies present" -ForegroundColor Green
 }
 
 # Show menu
@@ -103,9 +108,9 @@ switch ($choice) {
         $freeGB = [math]::Round($drive.Free / 1GB, 2)
         Write-Host "  Free: $freeGB GB" -ForegroundColor White
         if ($freeGB -lt 15) {
-            Write-Host "  ⚠️  Less than 15GB free - may run out of space!" -ForegroundColor Yellow
+            Write-Host "  [!] Less than 15GB free - may run out of space!" -ForegroundColor Yellow
         } else {
-            Write-Host "  ✅ Sufficient space" -ForegroundColor Green
+            Write-Host "  [OK] Sufficient space" -ForegroundColor Green
         }
         Write-Host ""
         
@@ -119,10 +124,10 @@ switch ($choice) {
         # Time estimate
         Write-Host "Training Estimate:" -ForegroundColor Yellow
         Write-Host "  Expected time: 13-18 hours" -ForegroundColor White
-        Write-Host "  Checkpoints: Every ~7-8 hours (step 500)" -ForegroundColor White
+        Write-Host "  Checkpoints: Every 500 steps (approx 7-8 hours)" -ForegroundColor White
         Write-Host ""
         
-        Write-Host "✅ System ready for training!" -ForegroundColor Green
+        Write-Host "[OK] System ready for training!" -ForegroundColor Green
         Write-Host ""
         pause
     }
@@ -131,9 +136,9 @@ switch ($choice) {
         Write-Host ""
         Write-Host "Starting training in foreground..." -ForegroundColor Cyan
         Write-Host ""
-        Write-Host "⏰ Estimated time: 13-18 hours" -ForegroundColor Yellow
-        Write-Host "💾 Checkpoints saved every 500 steps (~7-8 hours)" -ForegroundColor Yellow
-        Write-Host "🛑 Press Ctrl+C to stop (will save checkpoint)" -ForegroundColor Yellow
+        Write-Host "[TIME] Estimated: 13-18 hours" -ForegroundColor Yellow
+        Write-Host "[SAVE] Checkpoints every 500 steps (approx 7-8 hours)" -ForegroundColor Yellow
+        Write-Host "[STOP] Press Ctrl+C to stop (checkpoint will save)" -ForegroundColor Yellow
         Write-Host ""
         Write-Host "Training will start in 5 seconds..." -ForegroundColor Cyan
         Start-Sleep -Seconds 5
@@ -146,9 +151,9 @@ switch ($choice) {
         Write-Host ""
         Write-Host "Starting training in background..." -ForegroundColor Cyan
         Write-Host ""
-        Write-Host "⏰ Estimated time: 13-18 hours" -ForegroundColor Yellow
-        Write-Host "📊 Monitor: .\phase2_quickstart.ps1 → Option 6" -ForegroundColor Yellow
-        Write-Host "📝 Logs: logs\training.log" -ForegroundColor Yellow
+        Write-Host "[TIME] Estimated: 13-18 hours" -ForegroundColor Yellow
+        Write-Host "[MONITOR] Use option 6 to check progress" -ForegroundColor Yellow
+        Write-Host "[LOGS] View logs\training.log" -ForegroundColor Yellow
         Write-Host ""
         
         # Start in minimized window
@@ -158,10 +163,10 @@ switch ($choice) {
             "cd '$PWD'; .\venv\Scripts\Activate.ps1; Write-Host 'Training started...'; python training\train_lora.py"
         ) -WindowStyle Minimized
         
-        Write-Host "✅ Training started in background!" -ForegroundColor Green
+        Write-Host "[OK] Training started in background!" -ForegroundColor Green
         Write-Host ""
         Write-Host "To check progress:" -ForegroundColor Cyan
-        Write-Host "  .\phase2_quickstart.ps1 → Option 6" -ForegroundColor White
+        Write-Host "  .\phase2_quickstart.ps1 -> Option 6" -ForegroundColor White
         Write-Host ""
         pause
     }
@@ -173,7 +178,7 @@ switch ($choice) {
         $checkpoints = Get-ChildItem "adapters\discord-lora\checkpoint-*" -Directory -ErrorAction SilentlyContinue | Sort-Object Name
         
         if ($checkpoints.Count -eq 0) {
-            Write-Host "❌ No checkpoints found" -ForegroundColor Red
+            Write-Host "[X] No checkpoints found" -ForegroundColor Red
             Write-Host ""
             pause
         } else {
@@ -209,8 +214,8 @@ switch ($choice) {
             Get-Content "logs\training.log" -Tail 50
             Write-Host ""
         } else {
-            Write-Host "❌ Training log not found" -ForegroundColor Red
-            Write-Host "Training hasn't started yet." -ForegroundColor Yellow
+            Write-Host "[X] Training log not found" -ForegroundColor Red
+            Write-Host "Training has not started yet." -ForegroundColor Yellow
             Write-Host ""
         }
         pause
@@ -225,7 +230,7 @@ switch ($choice) {
             # Get latest step
             $latestStep = Get-Content "logs\training.log" | Select-String "Step \d+/\d+" | Select-Object -Last 1
             if ($latestStep) {
-                Write-Host "📊 Latest Progress:" -ForegroundColor Yellow
+                Write-Host "Latest Progress:" -ForegroundColor Yellow
                 Write-Host "  $($latestStep.Line)" -ForegroundColor White
                 Write-Host ""
             }
@@ -233,7 +238,7 @@ switch ($choice) {
             # Get loss trend
             $losses = Get-Content "logs\training.log" | Select-String "Loss: [\d\.]+" | Select-Object -Last 5
             if ($losses.Count -gt 0) {
-                Write-Host "📉 Recent Loss Values:" -ForegroundColor Yellow
+                Write-Host "Recent Loss Values:" -ForegroundColor Yellow
                 foreach ($loss in $losses) {
                     Write-Host "  $($loss.Line)" -ForegroundColor White
                 }
@@ -243,22 +248,22 @@ switch ($choice) {
             # Check checkpoints
             $checkpoints = Get-ChildItem "adapters\discord-lora\checkpoint-*" -Directory -ErrorAction SilentlyContinue
             if ($checkpoints) {
-                Write-Host "💾 Saved Checkpoints:" -ForegroundColor Yellow
+                Write-Host "Saved Checkpoints:" -ForegroundColor Yellow
                 foreach ($cp in $checkpoints | Sort-Object Name) {
-                    Write-Host "  ✅ $($cp.Name)" -ForegroundColor Green
+                    Write-Host "  [OK] $($cp.Name)" -ForegroundColor Green
                 }
                 Write-Host ""
             }
             
             # GPU status
-            Write-Host "🎮 GPU Status:" -ForegroundColor Yellow
+            Write-Host "GPU Status:" -ForegroundColor Yellow
             try {
                 $gpu = nvidia-smi --query-gpu=utilization.gpu,memory.used,memory.total,temperature.gpu --format=csv,noheader,nounits 2>$null
                 if ($gpu) {
-                    $parts = $gpu -split ','
+                    $parts = $gpu -split ","
                     Write-Host "  Utilization: $($parts[0].Trim())%" -ForegroundColor White
                     Write-Host "  VRAM: $($parts[1].Trim()) / $($parts[2].Trim()) MB" -ForegroundColor White
-                    Write-Host "  Temperature: $($parts[3].Trim())°C" -ForegroundColor White
+                    Write-Host "  Temperature: $($parts[3].Trim()) C" -ForegroundColor White
                 }
             } catch {
                 Write-Host "  (nvidia-smi not available)" -ForegroundColor Gray
@@ -266,7 +271,7 @@ switch ($choice) {
             Write-Host ""
             
         } else {
-            Write-Host "❌ Training hasn't started yet" -ForegroundColor Red
+            Write-Host "[X] Training has not started yet" -ForegroundColor Red
             Write-Host ""
         }
         
@@ -281,7 +286,7 @@ switch ($choice) {
     }
     
     default {
-        Write-Host "❌ Invalid choice" -ForegroundColor Red
+        Write-Host "Invalid choice" -ForegroundColor Red
     }
 }
 
