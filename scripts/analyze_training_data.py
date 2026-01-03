@@ -211,7 +211,7 @@ def main():
     print("="*60)
     
     # Configuration
-    input_file = "./data/training_data.jsonl"
+    input_file = "./data/raw_messages.jsonl"  # Analyze RAW messages
     output_file = "./data/training_data_filtered.jsonl"
     
     # Check if file exists
