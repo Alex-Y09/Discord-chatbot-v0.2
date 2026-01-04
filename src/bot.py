@@ -35,8 +35,20 @@ logger = logging.getLogger(__name__)
 
 # Configuration
 DISCORD_TOKEN = os.getenv("DISCORD_BOT_TOKEN")
-MAX_RESPONSE_LENGTH = int(os.getenv("MAX_NEW_TOKENS", 150))
-TEMPERATURE = float(os.getenv("TEMPERATURE", 0.7))
+
+# Response generation settings
+MAX_RESPONSE_LENGTH = int(os.getenv("MAX_NEW_TOKENS", "150"))
+TEMPERATURE = float(os.getenv("TEMPERATURE", "0.7"))
+TOP_P = float(os.getenv("TOP_P", "0.9"))
+TOP_K = int(os.getenv("TOP_K", "40"))
+REPETITION_PENALTY = float(os.getenv("REPETITION_PENALTY", "1.1"))
+
+# Memory settings
+SHORT_TERM_WINDOW = int(os.getenv("SHORT_TERM_WINDOW", "20"))
+SHORT_TERM_MAX_CONTEXT = int(os.getenv("SHORT_TERM_MAX_CONTEXT", "10"))
+ENABLE_LONG_TERM_MEMORY = os.getenv("ENABLE_LONG_TERM_MEMORY", "false").lower() == "true"
+LONG_TERM_DB_PATH = os.getenv("LONG_TERM_DB_PATH", "data/vector_db")
+LONG_TERM_TOP_K = int(os.getenv("LONG_TERM_TOP_K", "3"))
 
 class DiscordChatbot(commands.Bot):
     """Discord chatbot with trained personality"""
@@ -52,7 +64,7 @@ class DiscordChatbot(commands.Bot):
         
         # Initialize components
         self.inference_engine = None
-        self.short_term_memory = ShortTermMemory(window_size=20)
+        self.short_term_memory = ShortTermMemory(window_size=SHORT_TERM_WINDOW)
         self.long_term_memory = None
         
         logger.info("Bot initialized")
@@ -67,9 +79,12 @@ class DiscordChatbot(commands.Bot):
         await asyncio.to_thread(self.inference_engine.load_model)
         logger.info("Inference engine ready!")
         
-        # Initialize long-term memory (optional, can be added later)
-        # self.long_term_memory = LongTermMemory()
-        # await self.long_term_memory.initialize()
+        # Initialize long-term memory (if enabled)
+        if ENABLE_LONG_TERM_MEMORY:
+            logger.info("Initializing long-term memory...")
+            self.long_term_memory = LongTermMemory(db_path=LONG_TERM_DB_PATH)
+            await self.long_term_memory.initialize()
+            logger.info("Long-term memory ready!")
         
         logger.info("Bot setup complete!")
     
@@ -121,7 +136,7 @@ class DiscordChatbot(commands.Bot):
                 # Get conversation context from short-term memory
                 context = self.short_term_memory.get_context(
                     channel_id=message.channel.id,
-                    max_messages=10
+                    max_messages=SHORT_TERM_MAX_CONTEXT
                 )
                 
                 # Get long-term memory context (if enabled)
@@ -129,7 +144,7 @@ class DiscordChatbot(commands.Bot):
                 if self.long_term_memory:
                     relevant_memories = await self.long_term_memory.retrieve(
                         query=message.content,
-                        top_k=3
+                        top_k=LONG_TERM_TOP_K
                     )
                     if relevant_memories:
                         long_term_context = "\n".join(relevant_memories)
@@ -139,7 +154,11 @@ class DiscordChatbot(commands.Bot):
                     self.inference_engine.generate_response,
                     context=context,
                     long_term_context=long_term_context,
-                    max_length=MAX_RESPONSE_LENGTH
+                    max_length=MAX_RESPONSE_LENGTH,
+                    temperature=TEMPERATURE,
+                    top_p=TOP_P,
+                    top_k=TOP_K,
+                    repetition_penalty=REPETITION_PENALTY
                 )
                 
                 # Clean up response (remove mention from response if present)
