@@ -64,7 +64,7 @@ data/*.sqlite
 
 # Model Files (Very large, download separately)
 models/
-adapters/discord-lora/
+adapters/discord-lora/checkpoint-*/
 *.bin
 *.safetensors
 *.pt
